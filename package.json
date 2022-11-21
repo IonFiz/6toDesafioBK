@@ -1,0 +1,24 @@
+{
+  "name": "6to-desafio-bk",
+  "version": "1.0.0",
+  "description": "Sexto desafio de CoderHouse",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IonFiz/6toDesafioBK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IonFiz/6toDesafioBK/issues"
+  },
+  "homepage": "https://github.com/IonFiz/6toDesafioBK#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.5.3"
+  }
+}
