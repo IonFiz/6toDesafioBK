@@ -1,98 +1,110 @@
 const fs = require('fs');
-const path =  require('path');
 
 class Contenedor {
+	constructor(route) {
+		this.route = route;
+	}
 
-    constructor(filename){
-        this.filename = path.join(__dirname,"..", `files/${filename}`);
-    }
+	async readFileFunction(route) {
+		let file = await fs.promises.readFile(route, "utf8");
+		let fileParsed = await JSON.parse(file);
+		return fileParsed;
+	}
 
-    async save(product){
-        
-        try{
-            const products = await this.getAll();
-            if(products.length>0){
-                const lastId = products[products.length-1].id + 1;
-                product.id = lastId;
-                console.log(product.id);
-                products.push(product);
-                await fs.promises.writeFile(this.filename, JSON.stringify(products, null, 2));
-            }else{
-                product.id =  1;
-                await fs.promises.writeFile(this.filename, JSON.stringify([product], null, 2));
-            }
-            
+	async save(obj) {
+		try {
+			let dataFile = await this.readFileFunction(this.route);
+			if (dataFile.length) {
+				// [].length = 0 -> false
+				await fs.promises.writeFile(
+					this.route,
+					JSON.stringify([...dataFile, { ...obj }], null, 2)
+				);
+				// ... spread operator -> copia el array y lo agrega al final
+			} else {
+				await fs.promises.writeFile(
+					this.route,
+					JSON.stringify([{ ...obj }], null, 2)
+				);
+				console.log(`El archivo tiene id: ${dataFile.length + 1}`);
+			}
+		} catch (error) {
+			console.log("error de escritura", error);
+		}
+	}
 
-        } catch(err){
-            console.log(err);
-        }
-    }
+	async updateById(obj) {
+		try {
+			let data = await this.readFileFunction(this.ruta);
+			const objIndex = dataArch.findIndex(prod => prod.id === obj.id);
+			if (objIndex !== -1) {
+				// existe
+				data[objIndex] = obj;
+				await fs.promises.writeFile(
+					this.route,
+					JSON.stringify(data, null, 2)
+				);
+				return { message: "producto actualizado" };
+			} else {
+				// no existe
+				return { error: "producto no encontrado" };
+			}
+		} catch (error) {
+			console.log("error de lectura", error);
+		}
+	}
 
-    async getById(id){
-        try{
-        const products = await this.getAll();
+	// traer producto por id
+	async getById(id) {
+		try {
+			const dataFile = await this.readFileFunction(this.route);
+			const product = dataFile.find(prod => prod.id === id);
+			if (product) {
+				return product;
+			} else {
+				return { error: "producto no encontrado" };
+			}
+		} catch (error) {
+			console.log("no existe el id", error);
+		}
+	}
 
-        let item = products.find( product => product.id === id );
-        return item;
-
-        } catch (err){
-            console.log(err);
-        }
-        
-    }
-
-    async getAll(){
-
-        try{
-            const content = await fs.promises.readFile(this.filename, 'utf-8');
-            if(content.length > 0){
-                let array = JSON.parse(content);
-                return array;
-            }else{
-                return [];
-            }
-            
-        }
-        catch(err){
-            return "Cannot read file";
-        }
-
-
-    }
-
-    async deleteById(id){
-        try{
-            const products = await this.getAll();
-    
-            const newProducts = products.filter(product => product.id !== id);
-            console.log('Deleted product successfully');
-    
-            await fs.promises.writeFile(this.filename, JSON.stringify(newProducts, null, 2));
-            } catch (err){
-                return console.log(err);
-            }
-    }
-
-    async deleteAll(){
-        try{
-            let content = await fs.promises.readFile(this.filename, 'utf-8');
-
-            content = [];
-
-            console.log("Deleted everything");
-
-            await fs.promises.writeFile(this.filename, JSON.stringify(content, null, 2))
-        }
-        catch(err){
-            console.log("Error", err);
-        }
-    }
-    
-    async getRandom(){
-        const products = await this.getAll();
-        let item = products[Math.floor(Math.random()*products.length)];
-        return item;
-    }
+	//traer todos los productos
+	async getAll() {
+		try {
+			const dataFile = await this.readFileFunction(this.route);
+			if (dataFile.length) {
+				//console.log(dataArchParse);
+				return dataFile;
+			} else {
+				console.log("No hay productos");
+			}
+		} catch (error) {
+			console.log("error de lectura", error);
+		}
+	}
+	// eliminar producto por id
+	async deleteById(id) {
+		try {
+			const dataFile = await this.readFileFunction(this.route);
+			let product = dataFile.find(prod => prod.id === id);
+			if (product) {
+				const dataFileParseFiltered = dataFile.filter(
+					prod => prod.id !== id
+				);
+				await fs.promises.writeFile(
+					this.ruta,
+					JSON.stringify(dataFileParseFiltered, null, 2),
+					"utf-8"
+				);
+				console.log("Producto eliminado");
+			} else {
+				console.log("No se encontró producto");
+			}
+		} catch (error) {
+			console.log("No existe el id", error);
+		}
+	}
 }
 
-module.exports = Contenedor;
+module.exports = { Contenedor };
