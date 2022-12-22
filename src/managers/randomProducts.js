@@ -1,26 +1,38 @@
-const { faker } = require("@faker-js/faker");
+const server = io().connect();
 
-class Product {
-    constructor(id, title, price, thumbnail) {
-        this.id = id;
-        this.title = title;
-        this.price = price;
-        this.thumbnail = thumbnail;
-    }
-}
-// genera 5 productos random y los mete en array producto
-generateProducts = () => {
-    const products = [];
-    for (let i = 0; i < 5; i++) {
-        const producto = new Product(
-            faker.random.numeric(),
-            faker.commerce.productName(),
-            faker.commerce.price(100, 200, 0),
-            faker.image.imageUrl()
-        );
-        products.push(producto);
-    }
-    return products;
+const render = mensajesChat => {
+	let chat = document.querySelector("#chat");
+	let html = mensajesChat.map(mens => {
+		return `<li>
+        <strong style="color:blue"> ${mens.author}</strong> </strong>
+        <em style="color:green"> ${mens.text} </em>
+        </li>`;
+	});
+	chat.innerHTML = html.join("");
 };
 
-module.exports = { generateProducts };
+const addMessage = evt => {
+	const id = document.querySelector("#mail").value;
+	const nombre = document.querySelector("#nombre").value;
+	const apellido = document.querySelector("#apellido").value;
+	const edad = document.querySelector("#edad").value;
+	const alias = document.querySelector("#alias").value;
+	const avatar = document.querySelector("#avatar").value;
+	const text = document.querySelector("#text").value;
+
+	const chatText = {
+		author: { id, nombre, apellido, edad, alias, avatar },
+		text
+	};
+	// console.log(chatText);
+	server.emit("mensaje-nuevo", chatText, id => {
+		console.log(id);
+	});
+
+	return false;
+};
+
+server.on("mensaje-servidor", mensaje => {
+	// console.log("mensaje-servidor: ", mensaje);
+	render(mensaje.mensajesChat);
+});
