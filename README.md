@@ -1,3 +1,3 @@
 # CoderHouse Backend
 
-Sexto desafio de CoderHouse 
+# Desafios seis y once del curso de Backend en CoderHouse
